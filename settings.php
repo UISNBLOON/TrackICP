@@ -127,8 +127,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 确保email_config表存在
 function ensureEmailConfigTableExists($pdo) {
     try {
+        // 根据数据库类型选择自增关键字
+        global $config;
+        $auto_increment = ($config['database_type'] === 'mysql') ? 'AUTO_INCREMENT' : 'AUTOINCREMENT';
+        $int_type = ($config['database_type'] === 'mysql') ? 'INT' : 'INTEGER';
+
         $pdo->exec("CREATE TABLE IF NOT EXISTS email_config (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id $int_type PRIMARY KEY $auto_increment,
             smtp_host VARCHAR(255) NOT NULL,
             smtp_port INTEGER NOT NULL,
             smtp_username VARCHAR(255) NOT NULL,
