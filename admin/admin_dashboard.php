@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // 生成备案编号（如果通过审核）
         $registrationNumber = $registration['registration_number'];
         if ($status === 'approved' && empty($registrationNumber)) {
-            $registrationNumber = 'ICP-' . date('Ymd') . '-' . str_pad($id, 6, '0', STR_PAD_LEFT);
+            $registrationNumber = str_pad(rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
         }
 
         // 更新备案状态

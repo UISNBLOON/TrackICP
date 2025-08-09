@@ -74,7 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 如果没有错误，保存数据
     if (empty($errors)) {
         // 生成唯一备案编号 (ICP-年月日-6位ID)
-        $data['registration_number'] = 'ICP-' . date('Ymd') . '-' . str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+        // 生成8位数字备案编号
+        $data['registration_number'] = str_pad(rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['status'] = 'pending'; // 默认为待审核
         $data['reason'] = '';
@@ -97,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 null
             ]);
 
-            $success = '备案信息添加成功！备案编号: ' . $data['registration_number'];
+            $success = '备案信息添加成功！备案编号: 初ICP备' . $data['registration_number'] . '备';
         } catch (PDOException $e) {
             $errors[] = '添加备案信息失败: ' . $e->getMessage();
         }

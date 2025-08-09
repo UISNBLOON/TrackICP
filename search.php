@@ -219,7 +219,7 @@ require_once 'db_init.php';
                         foreach ($results as $result) {
                             echo '<div class="result-item">';
                             echo '<h3>' . htmlspecialchars($result['website_name']) . '</h3>';
-                            echo '<p><span class="result-label">备案编号：</span>' . htmlspecialchars($result['registration_number']) . '</p>';
+                            echo '<p><span class="result-label">备案编号：</span>初ICP备' . htmlspecialchars($result['registration_number']) . '备</p>';
                             
                             // 显示网站类型
                             $categoryMap = [

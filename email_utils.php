@@ -190,7 +190,7 @@ HTML;
             <p>您好！您的网站备案申请已通过审核，相关信息如下：</p>
             <p><strong>网站名称：</strong> {$registration['website_name']}</p>
             <p><strong>网站URL：</strong> <a href="{$registration['website_url']}">{$registration['website_url']}</a></p>
-            <p><strong>备案编号：</strong> {$registration['registration_number']}</p>
+            <p><strong>备案编号：</strong> 初ICP备{$registration['registration_number']}备</p>
             <p><strong>审核日期：</strong> {$registration['processed_at']}</p>
             <p>感谢您的耐心等待，如有任何问题，请随时联系我们。</p>
             <a href="{$registration['website_url']}" class="btn">访问网站</a>

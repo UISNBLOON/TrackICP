@@ -113,7 +113,7 @@ if (empty($registrations)) {
         echo '<div class="public-card">';
         echo '    <div class="public-icon">' . $firstChar . '</div>';
         echo '    <div class="public-name">' . $reg['website_name'] . '</div>';
-        echo '    <div class="public-id">' . $reg['registration_number'] . '</div>';
+        echo '    <div class="public-id">初ICP备' . $reg['registration_number'] . '备</div>';
         echo '</div>';
     }
 }
