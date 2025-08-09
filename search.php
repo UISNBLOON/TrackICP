@@ -253,8 +253,6 @@ require_once 'db_init.php';
             </div>
         </div>
 
-    <?php include 'common_footer.php'; ?>
-
 </div>
 </body>
 </html>

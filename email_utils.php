@@ -72,12 +72,7 @@ class EmailUtils {
             background-color: white;
             border-radius: 0 0 8px 8px;
         }
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #777;
-            font-size: 0.9rem;
-        }
+        /* 页脚已删除 */
         .btn {
             display: inline-block;
             background-color: #f57373;
@@ -103,9 +98,7 @@ class EmailUtils {
             <p>您可以根据上述原因修改您的申请信息后重新提交。如有任何疑问，请随时联系我们。</p>
             <a href="https://icp.example.com/register.php" class="btn">重新提交申请</a>
         </div>
-        <div class="footer">
-            <p>此邮件由系统自动发送，请勿回复。</p>
-        </div>
+        <!-- 页脚已删除 -->
     </div>
 </body>
 </html>
@@ -163,12 +156,7 @@ HTML;
             background-color: white;
             border-radius: 0 0 8px 8px;
         }
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #777;
-            font-size: 0.9rem;
-        }
+        /* 页脚已删除 */
         .btn {
             display: inline-block;
             background-color: #7873f5;
@@ -195,9 +183,7 @@ HTML;
             <p>感谢您的耐心等待，如有任何问题，请随时联系我们。</p>
             <a href="{$registration['website_url']}" class="btn">访问网站</a>
         </div>
-        <div class="footer">
-            <p>此邮件由系统自动发送，请勿回复。</p>
-        </div>
+        <!-- 页脚已删除 -->
     </div>
 </body>
 </html>
