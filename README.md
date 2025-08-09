@@ -1,5 +1,10 @@
 # 网站备案系统安装说明
 
+## 项目官网
+官网：[icp.stay55.xyz]
+B站：https://space.bilibili.com/1826201721?spm_id_from=333.1007.0.0(NoxBlaze)
+演示：deno.stay55.xyz
+
 ## 系统概述
 本系统是一个二次元网站备案管理系统，提供网站备案申请、审核和查询功能。
 
@@ -30,23 +35,17 @@
 
 ## 访问路径
 - 前台首页: `index.php`
-- 备案申请: {insert\_element\_1\_YHJlZ2lzdGVyLnBocGA=}
-- 备案查询: {insert\_element\_2\_YHNlYXJjaC5waHBg}
-- 管理员登录: {insert\_element\_3\_YGFkbWluX2xvZ2luLnBocGA=} 或访问 `/admin` 路径
-- 管理员控制面板: {insert\_element\_4\_YGFkbWluX2Rhc2hib2FyZC5waHBg}
-- 管理员账户管理: {insert\_element\_5\_YG1hbmFnZV9hZG1pbnMucGhwYA==}
-- 系统设置: {insert\_element\_6\_YHNldHRpbmdzLnBocGA=}
-
+- 管理员登录: `/admin`
 ## 注意事项
 1. 安装完成后，请立即修改默认管理员密码并妥善保管账户信息
 2. 数据备份：
    - MySQL 用户：定期通过数据库工具导出数据
    - SQLite 用户：备份数据库文件（默认路径为 `database.db`）
 3. 安全建议：
-   - 生产环境中删除或限制 {insert\_element\_7\_YGRpYWdub3N0aWNzLnBocGA=}、{insert\_element\_8\_YHRyb3VibGVzaG9vdC5waHBg} 等诊断工具的访问
+   - 生产环境中删除或限制 install.php 等的访问
    - 确保 Web 服务器用户（如 `www-data`）对数据库文件及配置文件有正确的读写权限
    - 定期更新 PHP 及服务器软件至最新版本
 4. 重新安装流程：
-   - 删除 {insert\_element\_9\_YGNvbmZpZy5waHBg} 文件
+   - 删除 config.php 文件
    - 手动清理数据库（MySQL 需删除对应数据库，SQLite 需删除 `.db` 文件）
    - 重新访问首页启动安装向导

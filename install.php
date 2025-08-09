@@ -205,7 +205,7 @@ EOT;
                 <title>安装完成</title>
                 <style>
                     body {
-                        font-family: Arial, sans-serif;
+                        font-family: \'ZD\', sans-serif;
                         line-height: 1.6;
                         color: #333;
                         background-color: #f5f5f5;
@@ -278,7 +278,7 @@ EOT;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: \'ZD\', sans-serif;
             line-height: 1.6;
             color: #333;
             background-color: #f5f5f5;

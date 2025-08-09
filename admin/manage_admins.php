@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // 加载配置
-$config = include 'config.php';
+$config = include '../config.php';
 
 // 数据库连接函数
 function getDatabaseConnection() {
@@ -117,7 +117,7 @@ $admins = getAllAdmins($pdo);
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'ZD', sans-serif;
         }
         body {
             background-color: #f0f2f5;

@@ -1,6 +1,6 @@
 <?php
 // 加载配置
-$config = include 'config.php';
+$config = include '../config.php';
 
 // 数据库连接函数
 function getDatabaseConnection() {
@@ -145,17 +145,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>添加备案信息 - <?php echo $siteInfo['name']; ?></title>
     <style>
-        @font-face {
-            font-family: 'ZD';
-            src: url('zd.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'ZD', sans-serif;
         }
         body {
             background-color: #f0f2f5;

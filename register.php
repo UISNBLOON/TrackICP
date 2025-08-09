@@ -116,72 +116,23 @@ if (!$siteInfo) {
     ];
 }
 ?>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>网站备案申请 - <?php echo $siteInfo['name']; ?></title>
-    <style>
-        @font-face {
-            font-family: 'ZD';
-            src: url('zd.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'ZD', sans-serif;
-        }
-        body {
-            background-color: #f0f2f5;
-            color: #333;
-            line-height: 1.6;
-        }
+<?php include 'common_header.php'; ?>
+
+<style>
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            margin-top: 20px;
         }
-        .header-frosted {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: #333;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        .header-nav {
-            display: flex;
-            gap: 20px;
-        }
-        .header-nav a {
-            color: #7873f5;
-            font-weight: bold;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        .header-nav a:hover {
-            color: #605acf;
-        }
-        header {
+        .header-content {
             background: linear-gradient(135deg, #ff6ec7, #7873f5);
             color: white;
-            padding: 80px 0 40px;
+            padding: 40px 0;
             text-align: center;
             border-radius: 10px;
             margin-bottom: 30px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-top: 60px;
         }
         h1 {
             font-size: 2.5rem;
@@ -279,23 +230,18 @@ if (!$siteInfo) {
             margin-bottom: 20px;
             border-left: 4px solid #2ecc71;
         }
+        @media (max-width: 768px) {
+            #randomImage {
+                max-height: 200px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header-frosted">
-        <h3><?php echo $siteInfo['name']; ?></h3>
-        <div class="header-nav">
-            <a href="index.php">首页</a>
-            <a href="register.php">备案申请</a>
-            <a href="search.php">备案查询</a>
-            <a href="admin_login.php">管理员登录</a>
+        <div class="header-content">
+            <h1>网站备案申请</h1>
+            <p class="subtitle">填写以下信息完成网站备案申请</p>
         </div>
-    </div>
-    <div class="container">
-        <header>
-            <h1><?php echo $siteInfo['name']; ?></h1>
-            <p class="subtitle"><?php echo $siteInfo['description']; ?></p>
-        </header>
 
         <div class="card">
             <h2>网站备案申请</h2>
@@ -359,5 +305,9 @@ if (!$siteInfo) {
             </form>
         </div>
     </div>
+
+    <!-- common_footer.php 文件不存在，已移除引用 -->
+
+</div>
 </body>
 </html>

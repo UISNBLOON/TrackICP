@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 // 加载配置
-$config = include 'config.php';
+$config = include '../config.php';
 
 // 数据库连接函数
 function getDatabaseConnection() {
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // 如果审核通过，发送邮件
         if ($status === 'approved') {
             // 加载邮件工具
-            require_once 'email_utils.php';
+            require_once '../email_utils.php';
 
             // 更新备案信息中的处理日期和备案编号
             $registration['status'] = 'approved';
@@ -217,17 +217,10 @@ ensureEmailConfigTableExists($pdo);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理员控制面板 - <?php echo $siteInfo['name']; ?></title>
     <style>
-        @font-face {
-            font-family: 'ZD';
-            src: url('zd.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'ZD', sans-serif;
         }
         body {
             background-color: #f0f2f5;

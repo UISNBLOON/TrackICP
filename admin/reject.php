@@ -20,11 +20,11 @@ if (empty($reason)) {
 }
 
 // 加载配置
-$config = include 'config.php';
+$config = include '../config.php';
 
 // 初始化数据库连接
-require_once 'db_init.php';
-require_once 'email_utils.php';
+require_once '../db_init.php';
+require_once '../email_utils.php';
 
 // 更新备案申请状态为拒绝
 try {

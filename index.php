@@ -11,81 +11,42 @@ if (!file_exists('config.php')) {
 // 加载配置
 $config = include 'config.php';
 ?>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $config['site_name'] ?? '网站备案系统'; ?></title>
-    <style>
-        @font-face {
-            font-family: 'ZD';
-            src: url('zd.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
+<?php include 'common_header.php'; ?>
+
+<div class="container">
+        <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'ZD', sans-serif;
         }
         body {
-            background-color: #f0f2f5;
+            background-image: url('img/Camera_XHS_17522965447511000g0082k8vvumgii0505o57.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: #333;
             line-height: 1.6;
+            background-color: #f0f2f5;
         }
+        /* 页眉样式已移至common_header.php */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-        }
-        .header-frosted {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: #333;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        .header-nav {
-            display: flex;
-            gap: 20px;
-        }
-        .header-nav span {
-            cursor: pointer;
-            color: #7873f5;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-        .header-nav span:hover {
-            color: #605acf;
-        }
-        header {
-            background: linear-gradient(135deg, #ff6ec7, #7873f5);
-            color: white;
-            padding: 80px 0 40px;
-            text-align: center;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-top: 60px;
+            margin-top: 90px; /* 为固定的页眉留出空间 */
         }
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .subtitle {
             font-size: 1.2rem;
             opacity: 0.9;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         .card {
             background: white;
@@ -94,6 +55,39 @@ $config = include 'config.php';
             margin-bottom: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: #7873f5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(120, 115, 245, 0.2);
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
         }
         .card:hover {
             transform: translateY(-5px);
@@ -142,7 +136,7 @@ $config = include 'config.php';
             text-align: center;
             padding: 20px;
             color: #777;
-            margin-top: 50px;
+            margin-top: 20px;
         }
         @media (max-width: 768px) {
             h1 {
@@ -151,60 +145,40 @@ $config = include 'config.php';
             .container {
                 padding: 15px;
             }
+            #randomImage {
+                max-height: 200px;
+            }
         }
     </style>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 登录按钮已经通过链接直接跳转，无需JavaScript处理
-        // 注册按钮已经通过链接直接跳转，无需JavaScript处理
-        // 查询备案按钮已经通过链接直接跳转，无需JavaScript处理
-    });
-</script>
 </head>
 <body>
-    <div class="header-frosted">
-            <h3><?php echo $config['site_name'] ?? '网站备案系统'; ?></h3>
-        <div class="header-nav">
-            <a href="admin_login.php" style="text-decoration: none;"><span id="login-btn">登录</span></a>
-            <a href="register.php" style="text-decoration: none;"><span id="register-btn">注册</span></a>
-            <a href="search.php" style="text-decoration: none;"><span id="search-btn">查询备案</span></a>
-        </div>
-    </div>
+
     <div class="container">
-        <header>
-            <h1><?php echo $config['site_name'] ?? '网站备案系统'; ?></h1>
-            <p class="subtitle"><?php echo $config['site_description'] ?? 'ICP备案管理平台'; ?></p>
-        </header>
-
         <div class="card">
-            <h2>欢迎使用</h2>
-            <p>本系统提供网站备案服务，让您的网站拥有合法的"身份凭证"。无论您是创作者、爱好者还是企业，都可以通过本系统为您的网站进行官方备案。</p>
-            <div style="text-align: center; margin-top: 30px;">
-                <a href="register.php" class="btn">立即备案</a>
-            </div>
+            <h2>备案查询</h2>
+            <p style="margin-bottom: 20px;">输入备案编号或网站地址查询备案信息</p>
+
+            <form method="get" action="search.php">
+                <div class="form-group">
+                    <label for="search_type">查询类型</label>
+                    <select id="search_type" name="search_type">
+                        <option value="registration_number">备案编号</option>
+                        <option value="website">网站地址</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="search_query">查询内容</label>
+                    <input type="text" id="search_query" name="search_query" placeholder="请输入查询内容" value="<?php if (isset($_GET['search_query'])) echo htmlspecialchars($_GET['search_query']); ?>">
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn">查询</button>
+                </div>
+            </form>
         </div>
 
-        <div class="card">
-            <h2>系统功能</h2>
-            <div class="features">
-                <div class="feature-item">
-                    <h3>网站备案</h3>
-                    <p>为您的网站提交备案信息，获取唯一备案编号。</p>
-                </div>
-                <div class="feature-item">
-                    <h3>备案信息查询</h3>
-                    <p>通过备案编号或网站地址查询已备案的网站信息。</p>
-                </div>
-                <div class="feature-item">
-                    <h3>备案证书生成</h3>
-                    <p>自动生成虚拟角色备案证书，支持下载和分享。</p>
-                </div>
-            </div>
-        </div>
-
-        <footer>
-            <p>© 2025</p>
-        </footer>
+        <!-- 页脚已删除 -->
     </div>
 </body>
 </html>

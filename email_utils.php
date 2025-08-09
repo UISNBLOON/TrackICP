@@ -48,7 +48,7 @@ class EmailUtils {
     <title>您的网站备案申请未通过审核</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'ZD', sans-serif;
             line-height: 1.6;
             color: #333;
         }
@@ -139,7 +139,7 @@ HTML;
     <title>您的网站备案申请已通过审核</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'ZD', sans-serif;
             line-height: 1.6;
             color: #333;
         }

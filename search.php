@@ -1,21 +1,21 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>备案查询 - 二次元网站备案系统</title>
+<?php
+// 检查是否已安装
+if (!file_exists('config.php')) {
+    header('Location: install.php');
+    exit;
+}
+
+// 加载配置
+$config = include 'config.php';
+?>
+<?php include 'common_header.php'; ?>
+
+<div class="container">
     <style>
-        @font-face {
-            font-family: 'ZD';
-            src: url('zd.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'ZD', sans-serif;
         }
         body {
             background-color: #f0f2f5;
@@ -26,8 +26,9 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            margin-top: 20px;
         }
-        header {
+        .header-content {
             background: linear-gradient(135deg, #ff6ec7, #7873f5);
             color: white;
             padding: 20px 0;
@@ -137,14 +138,16 @@
             padding: 30px;
             color: #777;
         }
+        @media (max-width: 768px) {
+            #randomImage {
+                max-height: 200px;
+            }
+        }
     </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>二次元网站备案系统</h1>
-            <p>网站备案查询</p>
-        </header>
+        <div class="header-content">
+            <h1>网站备案查询</h1>
+            <p>输入备案编号或网站地址查询备案信息</p>
+        </div>
 
         <div class="card">
             <h2>查询备案信息</h2>
@@ -249,5 +252,9 @@ require_once 'db_init.php';
                 ?>
             </div>
         </div>
-    </body>
+
+    <?php include 'common_footer.php'; ?>
+
+</div>
+</body>
 </html>

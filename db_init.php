@@ -97,8 +97,7 @@ try {
         $stmt->execute([$config['site_name'], $config['site_description']]);
     }
 
-    echo "数据库表结构初始化成功！<br>";
-    echo "<a href='admin_login.php'>返回管理员登录</a>";
+    // 表结构初始化完成
 } catch (PDOException $e) {
     die('创建表结构失败: ' . $e->getMessage());
 }
