@@ -5,8 +5,11 @@ if (!file_exists('config.php')) {
     exit;
 }
 
-// 加载配置
+// 正确加载配置
 $config = include 'config.php';
+if (!$config || !is_array($config)) {
+    die('配置文件加载失败');
+}
 
 // 初始化数据库连接
 require_once 'db_init.php';
@@ -60,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = '网站地址不能为空';
     } else {
         $website = trim($_POST['website_url']);
-        $website = preg_replace('#^https?://#', '', $website); // 统一格式
+        $website = preg_replace('#^https?://#', '', $website);
         $data['website_url'] = $website;
     }
 
@@ -73,11 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 如果没有错误，保存数据
     if (empty($errors)) {
-        // 生成唯一备案编号 (ICP-年月日-6位ID)
         // 生成8位数字备案编号
         $data['registration_number'] = str_pad(rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
         $data['created_at'] = date('Y-m-d H:i:s');
-        $data['status'] = 'pending'; // 默认为待审核
+        $data['status'] = 'pending';
         $data['reason'] = '';
 
         try {
@@ -120,195 +122,191 @@ if (!$siteInfo) {
 <?php include 'common_header.php'; ?>
 
 <style>
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            margin-top: 20px;
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .header-content {
+        background: linear-gradient(135deg, #ff6ec7, #7873f5);
+        color: white;
+        padding: 40px 0;
+        text-align: center;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+        color: #7873f5;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #555;
+    }
+    input[type="text"],
+    input[type="email"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border 0.3s ease;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    textarea:focus,
+    select:focus {
+        border-color: #7873f5;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(120, 115, 245, 0.2);
+    }
+    textarea {
+        height: 150px;
+        resize: vertical;
+    }
+    .btn {
+        display: inline-block;
+        background: #7873f5;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    .btn:hover {
+        background: #605acf;
+    }
+    .btn-container {
+        text-align: center;
+        margin-top: 30px;
+    }
+    .back-link {
+        display: inline-block;
+        margin-top: 15px;
+        color: #7873f5;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    .error {
+        color: #e74c3c;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    .success {
+        color: #2ecc71;
+        padding: 15px;
+        background: #f1f9f1;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2ecc71;
+    }
+    @media (max-width: 768px) {
+        #randomImage {
+            max-height: 200px;
         }
-        .header-content {
-            background: linear-gradient(135deg, #ff6ec7, #7873f5);
-            color: white;
-            padding: 40px 0;
-            text-align: center;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        h2 {
-            color: #7873f5;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
-        }
-        input[type="text"],
-        input[type="email"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border 0.3s ease;
-        }
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        textarea:focus,
-        select:focus {
-            border-color: #7873f5;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(120, 115, 245, 0.2);
-        }
-        textarea {
-            height: 150px;
-            resize: vertical;
-        }
-        .btn {
-            display: inline-block;
-            background: #7873f5;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background 0.3s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .btn:hover {
-            background: #605acf;
-        }
-        .btn-container {
-            text-align: center;
-            margin-top: 30px;
-        }
-        .back-link {
-            display: inline-block;
-            margin-top: 15px;
-            color: #7873f5;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        .error {
-            color: #e74c3c;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-        .success {
-            color: #2ecc71;
-            padding: 15px;
-            background: #f1f9f1;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            border-left: 4px solid #2ecc71;
-        }
-        @media (max-width: 768px) {
-            #randomImage {
-                max-height: 200px;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
-        <div class="header-content">
-            <h1>网站备案申请</h1>
-            <p class="subtitle">填写以下信息完成网站备案申请</p>
-        </div>
-
-        <div class="card">
-            <h2>网站备案申请</h2>
-
-            <?php if ($success): ?>
-                <div class="success"><?php echo $success; ?></div>
-            <?php endif; ?>
-
-            <?php if (!empty($errors)): ?>
-                <?php foreach ($errors as $error): ?>
-                    <div class="error"><?php echo $error; ?></div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-
-            <form method="post">
-                <div class="form-group">
-                    <label for="website_name">网站名称 *</label>
-                    <input type="text" id="website_name" name="website_name" required placeholder="请输入网站的名称">
-                </div>
-
-                <div class="form-group">
-                    <label for="website_category">网站类型 *</label>
-                    <select id="website_category" name="website_category" required>
-                        <option value="">请选择</option>
-                        <option value="anime">动漫网站</option>
-                        <option value="game">游戏网站</option>
-                        <option value="blog">个人博客</option>
-                        <option value="other">其他类型</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="contact_person">网站负责人 *</label>
-                    <input type="text" id="contact_person" name="contact_person" required placeholder="请输入网站负责人姓名">
-                </div>
-
-                <div class="form-group">
-                    <label for="contact_phone">联系电话 *</label>
-                    <input type="text" id="contact_phone" name="contact_phone" required placeholder="请输入联系电话">
-                </div>
-
-                <div class="form-group">
-                    <label for="contact_email">联系邮箱 *</label>
-                    <input type="email" id="contact_email" name="contact_email" required placeholder="请输入联系邮箱">
-                </div>
-
-                <div class="form-group">
-                    <label for="website_url">网站地址 *</label>
-                    <input type="text" id="website_url" name="website_url" required placeholder="请输入网站域名，不带http://">
-                </div>
-
-                <div class="form-group">
-                    <label for="website_description">网站描述 *</label>
-                    <textarea id="website_description" name="website_description" required placeholder="请简要描述网站内容"></textarea>
-                </div>
-
-                <div class="btn-container">
-                    <button type="submit" class="btn">提交备案</button>
-                    <a href="index.php" class="back-link">返回首页</a>
-                </div>
-            </form>
-        </div>
+    <div class="header-content">
+        <h1>网站备案申请</h1>
+        <p class="subtitle">填写以下信息完成网站备案申请</p>
     </div>
 
-    <!-- common_footer.php 文件不存在，已移除引用 -->
+    <div class="card">
+        <h2>网站备案申请</h2>
 
+        <?php if ($success): ?>
+            <div class="success"><?php echo $success; ?></div>
+        <?php endif; ?>
+
+        <?php if (!empty($errors)): ?>
+            <?php foreach ($errors as $error): ?>
+                <div class="error"><?php echo $error; ?></div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <form method="post">
+            <div class="form-group">
+                <label for="website_name">网站名称 *</label>
+                <input type="text" id="website_name" name="website_name" required placeholder="请输入网站的名称">
+            </div>
+
+            <div class="form-group">
+                <label for="website_category">网站类型 *</label>
+                <select id="website_category" name="website_category" required>
+                    <option value="">请选择</option>
+                    <option value="anime">动漫网站</option>
+                    <option value="game">游戏网站</option>
+                    <option value="blog">个人博客</option>
+                    <option value="other">其他类型</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="contact_person">网站负责人 *</label>
+                <input type="text" id="contact_person" name="contact_person" required placeholder="请输入网站负责人姓名">
+            </div>
+
+            <div class="form-group">
+                <label for="contact_phone">联系电话 *</label>
+                <input type="text" id="contact_phone" name="contact_phone" required placeholder="请输入联系电话">
+            </div>
+
+            <div class="form-group">
+                <label for="contact_email">联系邮箱 *</label>
+                <input type="email" id="contact_email" name="contact_email" required placeholder="请输入联系邮箱">
+            </div>
+
+            <div class="form-group">
+                <label for="website_url">网站地址 *</label>
+                <input type="text" id="website_url" name="website_url" required placeholder="请输入网站域名，不带http://">
+            </div>
+
+            <div class="form-group">
+                <label for="website_description">网站描述 *</label>
+                <textarea id="website_description" name="website_description" required placeholder="请简要描述网站内容"></textarea>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn">提交备案</button>
+                <a href="index.php" class="back-link">返回首页</a>
+            </div>
+        </form>
+    </div>
 </div>
 </body>
 </html>

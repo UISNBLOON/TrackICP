@@ -1,9 +1,15 @@
 <?php
 // 数据库初始化脚本
-// 这个脚本用于创建必要的数据库表结构
+// 安全检查：如果系统已安装，禁止访问
+if (file_exists('.installed')) {
+    die('系统已安装。数据库初始化已被禁用。');
+}
 
-// 加载配置
+// 正确加载配置
 $config = include 'config.php';
+if (!$config || !is_array($config)) {
+    die('配置文件加载失败');
+}
 
 // 数据库连接函数
 function getDatabaseConnection() {
@@ -24,7 +30,6 @@ function getDatabaseConnection() {
 // 连接数据库
 $pdo = getDatabaseConnection();
 
-// 创建表的SQL语句
 // 根据数据库类型选择合适的自增语法
 $autoIncrement = $config['database_type'] === 'mysql' ? 'AUTO_INCREMENT' : 'AUTOINCREMENT';
 
@@ -68,36 +73,7 @@ try {
     foreach ($queries as $query) {
         $pdo->exec($query);
     }
-
-    // 初始化管理员账户
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM admins");
-    $stmt->execute();
-    $count = $stmt->fetchColumn();
-
-    if ($count === 0) {
-        // 创建默认管理员账户
-        $username = $config['admin']['username'];
-        $password = $config['admin']['password'];
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-        $stmt = $pdo->prepare("INSERT INTO admins (username, password_hash) VALUES (?, ?)");
-        $stmt->execute([$username, $passwordHash]);
-
-        echo "管理员账户已创建！用户名: $username, 密码: $password <br>";
-        echo "请登录后立即修改密码！<br>";
-    }
-
-    // 初始化网站信息
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM site_info");
-    $stmt->execute();
-    $count = $stmt->fetchColumn();
-
-    if ($count === 0) {
-        $stmt = $pdo->prepare("INSERT INTO site_info (name, description) VALUES (?, ?)");
-        $stmt->execute([$config['site_name'], $config['site_description']]);
-    }
-
-    // 表结构初始化完成
+    echo "数据库表结构初始化完成<br>";
 } catch (PDOException $e) {
     die('创建表结构失败: ' . $e->getMessage());
 }
