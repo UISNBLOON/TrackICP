@@ -1,9 +1,11 @@
 <?php
-// 安装程序
+// 检查是否已安装（通过锁文件）
+if (file_exists('.installed')) {
+    die('系统已安装。如需重新安装，请删除 .installed 文件。');
+}
+
 // 检查是否已安装，允许通过?force=1参数强制进入安装
 if (file_exists('config.php') && (!isset($_GET['force']) || $_GET['force'] !== '1')) {
-    // 调试信息
-    error_log('install.php: config.php存在，重定向到index.php');
     header('Location: index.php');
     exit;
 }
@@ -11,44 +13,44 @@ if (file_exists('config.php') && (!isset($_GET['force']) || $_GET['force'] !== '
 // 处理表单提交
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // 验证网站信息
-        $site_name = trim($_POST['site_name']);
-        $site_description = trim($_POST['site_description']);
+    // 验证网站信息
+    $site_name = trim($_POST['site_name']);
+    $site_description = trim($_POST['site_description']);
 
-        if (empty($site_name)) {
-            $errors[] = '网站名称不能为空';
+    if (empty($site_name)) {
+        $errors[] = '网站名称不能为空';
+    }
+
+    // 验证数据库配置
+    $database_type = $_POST['database_type'];
+    $db_config = [];
+
+    if ($database_type === 'mysql') {
+        $db_config['host'] = trim($_POST['db_host']);
+        $db_config['port'] = trim($_POST['db_port']);
+        $db_config['name'] = trim($_POST['db_name']);
+        $db_config['user'] = trim($_POST['db_user']);
+        $db_config['password'] = trim($_POST['db_password']);
+
+        if (empty($db_config['name'])) {
+            $errors[] = '数据库名称不能为空';
         }
-
-        // 验证数据库配置
-        $database_type = $_POST['database_type'];
-        $db_config = [];
-
-        if ($database_type === 'mysql') {
-            $db_config['host'] = trim($_POST['db_host']);
-            $db_config['port'] = trim($_POST['db_port']);
-            $db_config['name'] = trim($_POST['db_name']);
-            $db_config['user'] = trim($_POST['db_user']);
-            $db_config['password'] = trim($_POST['db_password']);
-
-            if (empty($db_config['name'])) {
-                $errors[] = '数据库名称不能为空';
-            }
-            if (empty($db_config['user'])) {
-                $errors[] = '数据库用户名不能为空';
-            }
-        } else if ($database_type === 'sqlite') {
-            $db_config['path'] = trim($_POST['sqlite_path']);
-            // 确保目录存在
-            $dir = dirname($db_config['path']);
-            if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
-                $errors[] = '无法创建SQLite数据库目录';
-            }
+        if (empty($db_config['user'])) {
+            $errors[] = '数据库用户名不能为空';
         }
+    } else if ($database_type === 'sqlite') {
+        $db_config['path'] = trim($_POST['sqlite_path']);
+        // 确保目录存在
+        $dir = dirname($db_config['path']);
+        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+            $errors[] = '无法创建SQLite数据库目录';
+        }
+    }
 
-        // 验证管理员账户信息
-        $admin_username = trim($_POST['admin_username']);
-        $admin_password = trim($_POST['admin_password']);
-        $admin_password_confirm = trim($_POST['admin_password_confirm']);
+    // 验证管理员账户信息
+    $admin_username = trim($_POST['admin_username']);
+    $admin_password = trim($_POST['admin_password']);
+    $admin_password_confirm = trim($_POST['admin_password_confirm']);
 
     if (empty($admin_username)) {
         $errors[] = '管理员用户名不能为空';
@@ -66,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 如果没有错误，创建配置文件
     if (empty($errors)) {
-        // 创建配置文件
         // 生成密码哈希
         $password_hash = password_hash($admin_password, PASSWORD_DEFAULT);
 
@@ -135,11 +136,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("INSERT INTO site_info (name, description) VALUES (?, ?)");
             $stmt->execute([$site_name, $site_description]);
 
-            // 创建配置文件内容
+            // 创建配置文件内容（不包含明文密码）
             $config_content = <<<EOT
 <?php
 /**
  * 网站备案系统配置文件
+ * 安装时间: " . date('Y-m-d H:i:s') . "
  */
 
 return [
@@ -170,13 +172,7 @@ EOT;
             $config_content .= <<<EOT
     ],
 
-    // 管理员账户
-    'admin' => [
-        'username' => '$admin_username',
-        'password' => '$admin_password' // 安装后会自动加密
-    ],
-
-    // 邮件配置
+    // 邮件配置（请在系统设置中配置）
     'email' => [
         'smtp_host' => '',
         'smtp_port' => 465,
@@ -196,64 +192,104 @@ EOT;
                     mkdir('data', 0755);
                 }
 
+                // 创建安装锁文件
+                file_put_contents('.installed', date('Y-m-d H:i:s'));
+                
+                // 尝试删除安装文件
+                @unlink(__FILE__);
+                
+                // 如果存在db_init.php，也删除它
+                @unlink('db_init.php');
+
                 // 安装完成，显示提示页面
-            echo '<!DOCTYPE html>
-            <html lang="zh-CN">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>安装完成</title>
-                <style>
-                    body {
-                        font-family: \'ZD\', sans-serif;
-                        line-height: 1.6;
-                        color: #333;
-                        background-color: #f5f5f5;
-                        padding: 20px;
-                        text-align: center;
-                    }
-                    .container {
-                        max-width: 600px;
-                        margin: 50px auto;
-                        background-color: #fff;
-                        border-radius: 8px;
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                        padding: 30px;
-                    }
-                    .warning {
-                        color: #d9534f;
-                        font-weight: bold;
-                        margin-bottom: 20px;
-                    }
-                    .btn {
-                        display: inline-block;
-                        background-color: #4CAF50;
-                        color: white;
-                        padding: 12px 25px;
-                        border-radius: 4px;
-                        text-decoration: none;
-                        font-weight: bold;
-                        transition: background-color 0.3s;
-                        margin-top: 20px;
-                    }
-                    .btn:hover {
-                        background-color: #45a049;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>安装完成！</h1>
-                    <div class="warning">
-                        <p>重要安全提示：请立即删除服务器上的 install.php 文件！</p>
-                        <p>该文件包含敏感信息，可能被未授权用户利用。</p>
+                echo '<!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>安装完成</title>
+                    <style>
+                        body {
+                            font-family: \'ZD\', sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            background-color: #f5f5f5;
+                            padding: 20px;
+                            text-align: center;
+                        }
+                        .container {
+                            max-width: 600px;
+                            margin: 50px auto;
+                            background-color: #fff;
+                            border-radius: 8px;
+                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                            padding: 30px;
+                        }
+                        .warning {
+                            color: #d9534f;
+                            font-weight: bold;
+                            margin-bottom: 20px;
+                        }
+                        .btn {
+                            display: inline-block;
+                            background-color: #4CAF50;
+                            color: white;
+                            padding: 12px 25px;
+                            border-radius: 4px;
+                            text-decoration: none;
+                            font-weight: bold;
+                            transition: background-color 0.3s;
+                            margin-top: 20px;
+                        }
+                        .btn:hover {
+                            background-color: #45a049;
+                        }
+                        .permissions {
+                            text-align: left;
+                            background: #f9f9f9;
+                            padding: 15px;
+                            border-radius: 5px;
+                            margin: 20px 0;
+                        }
+                        .permissions h3 {
+                            margin-top: 0;
+                        }
+                        .permissions code {
+                            background: #eee;
+                            padding: 2px 5px;
+                            border-radius: 3px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>安装完成！</h1>
+                        <div class="warning">
+                            <p>重要：请立即设置正确的文件权限！</p>
+                        </div>
+                        <div class="permissions">
+                            <h3>请在服务器上执行以下命令：</h3>
+                            <p>1. 设置目录权限：</p>
+                            <p><code>chmod 755 /path/to/your/site</code></p>
+                            <p><code>chmod 750 /path/to/your/site/data</code></p>
+                            <p><code>chmod 640 /path/to/your/site/config.php</code></p>
+                            <p><code>chmod 640 /path/to/your/site/.htaccess</code></p>
+                            <p><code>chmod 640 /path/to/your/site/.installed</code></p>
+                            <br>
+                            <p>2. 设置文件所有者（假设Web服务器用户为www-data）：</p>
+                            <p><code>chown -R your-user:www-data /path/to/your/site</code></p>
+                            <br>
+                            <p>3. 如果install.php和db_init.php未自动删除，请手动删除：</p>
+                            <p><code>rm -f /path/to/your/site/install.php</code></p>
+                            <p><code>rm -f /path/to/your/site/db_init.php</code></p>
+                        </div>
+                        <p>管理员账户已创建：<strong>' . htmlspecialchars($admin_username) . '</strong></p>
+                        <p>请妥善保管您的登录凭据。</p>
+                        <a href="index.php" class="btn">前往首页</a>
                     </div>
-                    <p>安装已成功完成，您的网站备案系统已准备就绪。</p>
-                    <a href="index.php" class="btn">前往首页</a>
-                </div>
-            </body>
-            </html>';
-            exit;
+                </body>
+                </html>';
+                exit;
             } else {
                 $errors[] = '创建配置文件失败，请检查目录权限';
             }
@@ -278,7 +314,7 @@ EOT;
         }
 
         body {
-            font-family: \'ZD\', sans-serif;
+            font-family: 'ZD', sans-serif;
             line-height: 1.6;
             color: #333;
             background-color: #f5f5f5;

@@ -2,19 +2,20 @@
 <?php
 // 检查是否已安装
 if (!file_exists('config.php')) {
-    // 调试信息
-    error_log('index.php: config.php不存在，重定向到install.php');
     header('Location: install.php');
     exit;
 }
 
-// 加载配置
+// 正确加载配置
 $config = include 'config.php';
+if (!$config || !is_array($config)) {
+    die('配置文件加载失败');
+}
 ?>
 <?php include 'common_header.php'; ?>
 
 <div class="container">
-        <style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -29,12 +30,11 @@ $config = include 'config.php';
             line-height: 1.6;
             background-color: #f0f2f5;
         }
-        /* 页眉样式已移至common_header.php */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            margin-top: 90px; /* 为固定的页眉留出空间 */
+            margin-top: 90px;
         }
         h1 {
             font-size: 2.5rem;
@@ -56,18 +56,15 @@ $config = include 'config.php';
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .form-group {
             margin-bottom: 20px;
         }
-
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
             color: #555;
         }
-
         input[type="text"],
         select {
             width: 100%;
@@ -77,14 +74,12 @@ $config = include 'config.php';
             font-size: 1rem;
             transition: border 0.3s ease;
         }
-
         input[type="text"]:focus,
         select:focus {
             border-color: #7873f5;
             outline: none;
             box-shadow: 0 0 0 3px rgba(120, 115, 245, 0.2);
         }
-
         .btn-container {
             text-align: center;
             margin-top: 30px;
@@ -152,7 +147,6 @@ $config = include 'config.php';
     </style>
 </head>
 <body>
-
     <div class="container">
         <div class="card">
             <h2>备案查询</h2>
@@ -177,8 +171,6 @@ $config = include 'config.php';
                 </div>
             </form>
         </div>
-
-        <!-- 页脚已删除 -->
     </div>
 </body>
 </html>

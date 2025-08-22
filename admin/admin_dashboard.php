@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <?php
+session_start();
+require_once '../auth_check.php';
+checkAdminAuth();
+$csrf_token = generateCSRFToken();
+
 // 加载配置
 $config = include '../config.php';
 
@@ -35,7 +40,10 @@ if (!$siteInfo) {
 }
 
 // 处理备案状态更新
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status' && isset($_POST['id']) && isset($_POST['status'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
+    // 验证CSRF令牌
+    verifyCSRFToken($_POST['csrf_token'] ?? '');
+    
     $id = $_POST['id'];
     $status = $_POST['status'];
     $reason = $_POST['reason'] ?? '';
@@ -514,6 +522,7 @@ ensureEmailConfigTableExists($pdo);
             <h3 id="modalTitle">审核操作</h3>
             <form method="post" id="actionForm">
                 <input type="hidden" name="action" value="update_status">
+                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                 <input type="hidden" name="id" id="registrationId">
                 <input type="hidden" name="status" id="actionStatus">
                 

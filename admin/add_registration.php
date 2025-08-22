@@ -1,4 +1,9 @@
 <?php
+session_start();
+require_once '../auth_check.php';
+checkAdminAuth();
+$csrf_token = generateCSRFToken();
+
 // 加载配置
 $config = include '../config.php';
 
@@ -37,6 +42,9 @@ if (!$siteInfo) {
 $success = '';
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 验证CSRF令牌
+    verifyCSRFToken($_POST['csrf_token'] ?? '');
+    
     // 验证表单数据
     $data = [];
 
@@ -103,7 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 如果没有错误，保存数据
     if (empty($errors)) {
-        // 生成唯一备案编号 (ICP-年月日-6位ID)
         // 生成8位数字备案编号
         $data['registration_number'] = str_pad(rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
         $data['created_at'] = date('Y-m-d H:i:s');
@@ -338,6 +345,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="post" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                
                 <div class="form-group">
                     <label for="website_name">网站名称 *</label>
                     <input type="text" id="website_name" name="website_name" required placeholder="请输入网站的名称">

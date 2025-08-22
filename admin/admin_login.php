@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // 加载配置
 $config = include '../config.php';
 
@@ -8,52 +10,99 @@ function getDatabaseConnection() {
     try {
         if ($config['database_type'] === 'mysql') {
             $dsn = "mysql:host={$config['database_config']['host']};port={$config['database_config']['port']};dbname={$config['database_config']['name']};charset=utf8mb4";
-            return new PDO($dsn, $config['database_config']['user'], $config['database_config']['password']);
+            $pdo = new PDO($dsn, $config['database_config']['user'], $config['database_config']['password']);
         } else if ($config['database_type'] === 'sqlite') {
             $dsn = "sqlite:{$config['database_config']['path']}";
-            return new PDO($dsn);
+            $pdo = new PDO($dsn);
         }
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        return $pdo;
     } catch (PDOException $e) {
-        die('数据库连接失败: ' . $e->getMessage());
+        die('数据库连接失败');
     }
 }
 
 // 处理注销请求
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
-    setcookie('admin_logged_in', '', time() - 3600, '/');
+    session_unset();
+    session_destroy();
     header('Location: admin_login.php');
     exit;
 }
 
 // 检查是否已登录
-if (isset($_COOKIE['admin_logged_in']) && $_COOKIE['admin_logged_in'] === 'true') {
+if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
     header('Location: admin_dashboard.php');
     exit;
 }
 
+// 防止暴力破解：记录失败次数
+if (!isset($_SESSION['login_attempts'])) {
+    $_SESSION['login_attempts'] = 0;
+    $_SESSION['last_attempt'] = time();
+}
+
+// 重置计数器（5分钟后）
+if (time() - $_SESSION['last_attempt'] > 300) {
+    $_SESSION['login_attempts'] = 0;
+}
+
 $error = '';
+
 // 处理登录请求
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-
-    // 连接数据库
-    $pdo = getDatabaseConnection();
-
-    // 查询管理员信息
-    $stmt = $pdo->prepare("SELECT password_hash FROM admins WHERE username = ?");
-    $stmt->execute([$username]);
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // 验证密码
-    if ($admin && password_verify($password, $admin['password_hash'])) {
-        // 设置登录cookie，有效期1小时
-        setcookie('admin_logged_in', 'true', time() + 3600, '/');
-        header('Location: admin_dashboard.php');
-        exit;
+    // 检查是否超过最大尝试次数（5次）
+    if ($_SESSION['login_attempts'] >= 5) {
+        $error = '登录尝试次数过多，请5分钟后重试';
     } else {
-        $error = '用户名或密码错误';
+        // 验证CSRF令牌
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            $error = '安全验证失败，请重新登录';
+        } else {
+            $username = $_POST['username'] ?? '';
+            $password = $_POST['password'] ?? '';
+
+            // 输入验证
+            if (empty($username) || empty($password)) {
+                $error = '用户名和密码不能为空';
+            } else {
+                // 连接数据库
+                $pdo = getDatabaseConnection();
+
+                // 查询管理员信息
+                $stmt = $pdo->prepare("SELECT id, password_hash FROM admins WHERE username = ?");
+                $stmt->execute([$username]);
+                $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                // 验证密码
+                if ($admin && password_verify($password, $admin['password_hash'])) {
+                    // 登录成功，重置尝试次数
+                    $_SESSION['login_attempts'] = 0;
+                    
+                    // 设置会话变量
+                    $_SESSION['admin_logged_in'] = true;
+                    $_SESSION['admin_id'] = $admin['id'];
+                    $_SESSION['admin_username'] = $username;
+                    $_SESSION['last_activity'] = time();
+                    
+                    // 重新生成会话ID
+                    session_regenerate_id(true);
+                    
+                    header('Location: admin_dashboard.php');
+                    exit;
+                } else {
+                    $_SESSION['login_attempts']++;
+                    $_SESSION['last_attempt'] = time();
+                    $error = '用户名或密码错误';
+                }
+            }
+        }
     }
+}
+
+// 生成CSRF令牌
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 ?>
 <!DOCTYPE html>
@@ -137,23 +186,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-top: 15px;
             text-align: center;
         }
+        .info {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <h1>管理员登录</h1>
         <form method="post" class="login-form">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            
             <div class="form-group">
                 <label for="username">用户名</label>
-                <input type="text" id="username" name="username" required placeholder="请输入管理员用户名">
+                <input type="text" id="username" name="username" required placeholder="请输入管理员用户名" autocomplete="username">
             </div>
+            
             <div class="form-group">
                 <label for="password">密码</label>
-                <input type="password" id="password" name="password" required placeholder="请输入管理员密码">
+                <input type="password" id="password" name="password" required placeholder="请输入管理员密码" autocomplete="current-password">
             </div>
+            
             <button type="submit" class="btn">登录</button>
+            
             <?php if (!empty($error)): ?>
-                <div class="error"><?php echo $error; ?></div>
+                <div class="error"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
+            
+            <?php if ($_SESSION['login_attempts'] >= 3): ?>
+                <div class="info">
+                    剩余尝试次数: <?php echo 5 - $_SESSION['login_attempts']; ?>
+                </div>
             <?php endif; ?>
         </form>
     </div>

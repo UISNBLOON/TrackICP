@@ -1,11 +1,7 @@
 <?php
-// 管理员审核通过备案申请
-
-// 检查是否已登录
-if (!isset($_COOKIE['admin_logged_in']) || $_COOKIE['admin_logged_in'] !== 'true') {
-    header('Location: admin_login.php');
-    exit;
-}
+session_start();
+require_once '../auth_check.php';
+checkAdminAuth();
 
 // 检查是否提供了申请ID
 if (!isset($_POST['registration_id'])) {
@@ -15,8 +11,11 @@ if (!isset($_POST['registration_id'])) {
 $registrationId = $_POST['registration_id'];
 $reason = $_POST['reason'] ?? '审核通过';
 
-// 加载配置
+// 正确加载配置
 $config = include '../config.php';
+if (!$config || !is_array($config)) {
+    die('配置文件加载失败');
+}
 
 // 初始化数据库连接
 require_once '../db_init.php';

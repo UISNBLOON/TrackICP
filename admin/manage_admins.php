@@ -1,12 +1,16 @@
 <?php
-// 管理管理员账户脚本
-// 使用方法: 访问此文件并按照提示操作
+session_start();
+require_once '../auth_check.php';
+checkAdminAuth();
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// 加载配置
+// 正确加载配置
 $config = include '../config.php';
+if (!$config || !is_array($config)) {
+    die('配置文件加载失败');
+}
 
 // 数据库连接函数
 function getDatabaseConnection() {
@@ -72,39 +76,51 @@ $message = '';
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        switch ($_POST['action']) {
-            case 'add':
-                $username = trim($_POST['username']);
-                $password = trim($_POST['password']);
-                $confirm_password = trim($_POST['confirm_password']);
+    // 验证CSRF令牌
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        $message = '安全验证失败';
+    } else {
+        if (isset($_POST['action'])) {
+            switch ($_POST['action']) {
+                case 'add':
+                    $username = trim($_POST['username']);
+                    $password = trim($_POST['password']);
+                    $confirm_password = trim($_POST['confirm_password']);
 
-                if (empty($username) || empty($password)) {
-                    $message = '用户名和密码不能为空';
-                } elseif ($password !== $confirm_password) {
-                    $message = '两次输入的密码不一致';
-                } elseif (strlen($password) < 6) {
-                    $message = '密码长度不能少于6位';
-                } else {
-                    $result = addAdmin($pdo, $username, $password);
-                    $success = $result['success'];
-                    $message = $result['message'];
-                }
-                break;
+                    if (empty($username) || empty($password)) {
+                        $message = '用户名和密码不能为空';
+                    } elseif ($password !== $confirm_password) {
+                        $message = '两次输入的密码不一致';
+                    } elseif (strlen($password) < 6) {
+                        $message = '密码长度不能少于6位';
+                    } else {
+                        $result = addAdmin($pdo, $username, $password);
+                        $success = $result['success'];
+                        $message = $result['message'];
+                    }
+                    break;
 
-            case 'delete':
-                $id = (int)$_POST['id'];
-                $result = deleteAdmin($pdo, $id);
-                $success = $result['success'];
-                $message = $result['message'];
-                break;
+                case 'delete':
+                    $id = (int)$_POST['id'];
+                    // 防止删除自己
+                    if ($id == $_SESSION['admin_id']) {
+                        $message = '不能删除当前登录的管理员账户';
+                    } else {
+                        $result = deleteAdmin($pdo, $id);
+                        $success = $result['success'];
+                        $message = $result['message'];
+                    }
+                    break;
+            }
         }
     }
 }
 
+// 生成CSRF令牌
+$csrf_token = generateCSRFToken();
+
 // 获取所有管理员
 $admins = getAllAdmins($pdo);
-
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -244,14 +260,19 @@ $admins = getAllAdmins($pdo);
                     <?php foreach ($admins as $admin): ?>
                         <tr>
                             <td><?php echo $admin['id']; ?></td>
-                            <td><?php echo $admin['username']; ?></td>
+                            <td><?php echo htmlspecialchars($admin['username']); ?></td>
                             <td><?php echo $admin['created_at']; ?></td>
                             <td>
-                                <form method="post" style="display: inline;">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?php echo $admin['id']; ?>">
-                                    <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这个管理员账户吗？');">删除</button>
-                                </form>
+                                <?php if ($admin['id'] != $_SESSION['admin_id']): ?>
+                                    <form method="post" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="<?php echo $admin['id']; ?>">
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这个管理员账户吗？');">删除</button>
+                                    </form>
+                                <?php else: ?>
+                                    <span style="color: #999;">当前账户</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -262,6 +283,7 @@ $admins = getAllAdmins($pdo);
         <div class="card">
             <h2>添加新管理员</h2>
             <form method="post">
+                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                 <input type="hidden" name="action" value="add">
                 <div class="form-group">
                     <label for="username">用户名</label>
