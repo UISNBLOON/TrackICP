@@ -1,11 +1,7 @@
 <?php
-// 管理员拒绝备案申请
-
-// 检查是否已登录
-if (!isset($_COOKIE['admin_logged_in']) || $_COOKIE['admin_logged_in'] !== 'true') {
-    header('Location: admin_login.php');
-    exit;
-}
+session_start();
+require_once '../auth_check.php';
+checkAdminAuth();
 
 // 检查是否提供了申请ID
 if (!isset($_POST['registration_id'])) {
@@ -19,8 +15,11 @@ if (empty($reason)) {
     die('请提供拒绝原因');
 }
 
-// 加载配置
+// 正确加载配置
 $config = include '../config.php';
+if (!$config || !is_array($config)) {
+    die('配置文件加载失败');
+}
 
 // 初始化数据库连接
 require_once '../db_init.php';
@@ -49,7 +48,7 @@ try {
 
     // 发送邮件通知
     try {
-        $emailUtils = new EmailUtils($config);
+        $emailUtils = new EmailUtils($pdo);
         $emailUtils->sendRejectionEmail($registration);
     } catch (Exception $e) {
         // 邮件发送失败，记录日志但不影响主流程
